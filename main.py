@@ -8,7 +8,7 @@ from datetime import date
 # URL = 'https://www.rightmove.co.uk/property-for-sale/find.html?searchType=SALE&locationIdentifier=REGION^93968&insId=1&radius=0.25&minPrice=475000&maxPrice=550000&minBedrooms=2&displayPropertyType=&maxDaysSinceAdded=&_includeSSTC=on&sortByPriceDescending=&primaryDisplayPropertyType=&secondaryDisplayPropertyType=&oldDisplayPropertyType=&oldPrimaryDisplayPropertyType=&newHome=&auction=false'
 
 
-def extract_from_api():
+def extract_from_api(save_to_disk, partial_data):
     page_index_num = 0
     http = urllib3.PoolManager()
 
@@ -47,9 +47,13 @@ def extract_from_api():
     property_address = []
     property_price = []
     property_link = []
+    key_val = []
 
-    # for page in range(total_pages):
-    for page in range(3):
+    if partial_data:
+        total_pages = 1
+
+    for page in range(total_pages):
+        # for page in range(3):
         page_index_num = 24 * page
         # print("Index I will use is:", page_index_num)
         print(page)
@@ -77,15 +81,21 @@ def extract_from_api():
             link_html = prop_link.find("a", href=True)
             link_value = link_html["href"]
             property_link.append("rightmove.co.uk"+link_value)
+            key_val.append(link_value.split("/")[2])
 
     df = pd.DataFrame({
-        "Name": clean_prop_name,
+        "Property_ID": key_val,
+        "Name": property_list,
         "Address": property_address,
         "Price": property_price,
         "Link": property_link,
-        "Extracted_Date": "",
+        "Extracted_Date": date.today(),
 
     })
+    if save_to_disk:
+        df.to_csv("Properties" +
+                  date.today().strftime("%Y%m%d") + ".csv", index=False)
+
     return df
 
     # property_zipped = list(
@@ -95,11 +105,10 @@ def extract_from_api():
     #     "Name", "Address", "Prices", "Link"])
 
 
-def get_data():
-    pull_from_api = 0
+def get_data(pull_from_api, save_to_disk, partial_data):
     if pull_from_api:
         print("I will try to extract from the API")
-        df = extract_from_api()
+        df = extract_from_api(save_to_disk, partial_data)
     else:
         print("I will just use the stored CSV")
         df = pd.read_csv("Properties.csv")
@@ -107,6 +116,7 @@ def get_data():
     return df
 
 
-df = get_data()
-df.loc[:, "Extracted_Date"] = date.today()
-print(df)
+df = get_data(pull_from_api=True, save_to_disk=True, partial_data=True)
+# print(df)
+# my_fn = date.today().strftime("%Y-%m-%d") + ".csv"
+# print(my_fn)
