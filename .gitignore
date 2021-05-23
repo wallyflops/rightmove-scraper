@@ -1,3 +1,4 @@
 /.vscode
 /Properties.csv
 /venv
+/db_passwords.py
