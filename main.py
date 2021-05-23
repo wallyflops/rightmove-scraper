@@ -40,11 +40,11 @@ def extract_from_api(save_to_disk, partial_data):
 
     payload = {
         'searchType': 'SALE',
-        'locationIdentifier': 'REGION^93968',
+        'locationIdentifier': 'REGION^746',
         'insId': 1,
         'radius': 0,
-        'minPrice': 500000,
-        'maxPrice': 500000,
+        'minPrice': 450000,
+        'maxPrice': 550000,
         'minBedrooms': 2,
         'maxDaysSinceAdded': '',
         'displayPropertyType': '',
@@ -153,7 +153,7 @@ def connect_to_db():
     )
 
     df.to_sql(name='Properties', con=engine, schema='rms',
-              if_exists='replace', index=False)
+              if_exists='append', index=False)
 
 
 df = get_data(pull_from_api=True, save_to_disk=False, partial_data=False)
